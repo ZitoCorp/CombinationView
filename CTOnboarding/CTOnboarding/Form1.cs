@@ -73,34 +73,15 @@ System.Windows.Forms.TreeViewEventArgs e)
             treeView1.SelectedNode = curNode;
 
             
-
-
-            //selectedNode = curNode;
-
             if (e.Button != MouseButtons.Right) return;
 
 
-            this.contextMenuStrip1.Show(treeView1, e.X,e.Y);
+            contextMenuStrip1.Show(treeView1, e.X,e.Y);
         }
 
-    //    protected void treeView1_NodeMouseDoubleClick(object sender,
-    //TreeNodeMouseClickEventArgs e)
-    //    {
-    //        if (e.Button != MouseButtons.Right) return;
-
-    //        TreeNode curNode = treeView1.GetNodeAt(e.X, e.Y);
-    //        treeView1.SelectedNode = curNode;
-
-    //        curNode.BeginEdit();
-    //    }
 
         private void SaveNodes(TreeNodeCollection nodesCollection, XmlWriter textWriter)
         {
-            //foreach (var node in nodesCollection.OfType<TreeNode>().Where(x => x.Nodes.Count == 0))
-            //    textWriter.WriteAttributeString(node.Text);
-
-
-
             foreach (var node in nodesCollection.OfType<TreeNode>())
             {
                 textWriter.WriteStartElement(node.Text);
@@ -109,8 +90,6 @@ System.Windows.Forms.TreeViewEventArgs e)
             }
         }
 
-        // Add the children of this XML node 
-        // to this child nodes collection.
         private void AddTreeViewChildNodes(
             TreeNodeCollection parent_nodes, XmlNode xml_node)
         {
@@ -144,26 +123,12 @@ System.Windows.Forms.TreeViewEventArgs e)
             treeView1.Sort();
         }
 
-        //private void maketree()
-        //{
-        //    XElement contacts = XElement.Load("treestructure.xml");
-        //    System.Console.WriteLine(contacts.Element("Genders").Elements("Gender").ToList()[0].Value);
-        //    treeView1.BeginUpdate();
-        //    TreeNode defaulet = treeView1.Nodes.Add(contacts.Name.ToString());
-        //    defaulet.Nodes.Add(contacts.Element("Genders").Elements("Gender").ToList());
-        //    treeView1.EndUpdate();
-        //}
-
-            
-
         private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
         {
-
             XmlWriter writer = null;
 
             try
             {
-
                 // Create an XmlWriterSettings object with the correct options.
                 XmlWriterSettings settings = new XmlWriterSettings();
                 settings.Indent = true;
@@ -184,8 +149,6 @@ System.Windows.Forms.TreeViewEventArgs e)
 
             parsedData.TableName = "ADGroups";
             parsedData.WriteXml("DataXML.xml", XmlWriteMode.WriteSchema);
-
-
         }
 
         public Form1()
@@ -199,10 +162,6 @@ System.Windows.Forms.TreeViewEventArgs e)
             {
                 column.Visible = false;
             }
-
-            dataGridView1.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-
-            //selectedNode = treeView1.Nodes["Default"];
         }
 
         private void treeView1_AfterLabelEdit(object sender,
@@ -219,7 +178,6 @@ System.Windows.Forms.TreeViewEventArgs e)
         {
             TreeNode newChild = treeView1.SelectedNode.Nodes.Add("New");
             treeView1.SelectedNode.Expand();
-            //treeView1.SelectedNode = newChild;
             newChild.BeginEdit();
         }
 
