@@ -17,53 +17,60 @@ namespace CTOnboarding
         //private TreeNode oldSelectedNode;
         DataTable parsedData = new DataTable();
 
-        protected void treeView1_AfterSelect(object sender,
-System.Windows.Forms.TreeViewEventArgs e)
+        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
         {
-            System.Console.WriteLine(treeView1.SelectedNode.Text);
+            XmlWriter writer = null;
 
-            if (treeView1.SelectedNode != null && dataGridView1.Columns[treeView1.SelectedNode.Text] != null)
+            try
             {
-                if(selectedNode!=null && dataGridView1.Columns[selectedNode.Text] != null)
-                    dataGridView1.Columns[selectedNode.Text].Visible = false;
+                // Create an XmlWriterSettings object with the correct options.
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Indent = true;
+                settings.IndentChars = ("\t");
+                settings.OmitXmlDeclaration = true;
 
-                dataGridView1.Columns[treeView1.SelectedNode.Text].Visible = true;
+                // Create the XmlWriter object and write some content.
+                writer = XmlWriter.Create("treestructure.xml", settings);
+                //writer.WriteStartElement("Default");
+                SaveNodes(treeView1.Nodes, writer);
+                //writer.WriteEndAttribute();
             }
-            //oldSelectedNode = selectedNode;
-
-            if(dataGridView1.Columns[treeView1.SelectedNode.Text] != null)
-                selectedNode = treeView1.SelectedNode;
-        }
-
-        protected void treeView1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.Delete) return;
-
-            TreeNode nodeToDelete = treeView1.SelectedNode;
-            TreeNode nextNode = treeView1.SelectedNode.PrevNode != null ? treeView1.SelectedNode.PrevNode : treeView1.SelectedNode.Parent;
-
-            treeView1.SelectedNode = nextNode;
-
-            if(parsedData.Columns[nodeToDelete.Text] != null)
+            finally
             {
-                //selectedNode = treeView1.SelectedNode.Parent;
-               // dataGridView1.Columns[treeView1.SelectedNode.Text].Visible = false;
-                parsedData.Columns.Remove(nodeToDelete.Text);
+                if (writer != null)
+                    writer.Close();
             }
-            treeView1.Nodes.Remove(nodeToDelete);
 
-            //selectedNode = null;
+            parsedData.TableName = "ADGroups";
+            parsedData.WriteXml("DataXML.xml", XmlWriteMode.IgnoreSchema);
+            parsedData.WriteXmlSchema("DataSchema.xml");
         }
-        private void DataGridView1_CellMouseClick(Object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Right) return;
 
-            contextMenuStrip2.Show(dataGridView1, e.X, e.Y);
-        }
-            protected void treeView1_NodeMouseClick(object sender,
-    TreeNodeMouseClickEventArgs e)
+        public Form1()
         {
-            TreeNode curNode = treeView1.GetNodeAt(e.X,e.Y);
+            InitializeComponent();
+            LoadTreeViewFromXmlFile();
+            parsedData.ReadXmlSchema("DataSchema.xml");
+            parsedData.ReadXml("DataXML.xml");
+            dataGridView1.DataSource = parsedData;
+
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            {
+                column.Visible = false;
+            }
+        }
+
+
+
+
+
+
+
+        #region Hierarchy interactions
+
+        protected void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            TreeNode curNode = treeView1.GetNodeAt(e.X, e.Y);
 
             if (e.Button == MouseButtons.Left && curNode == selectedNode)
             {
@@ -72,13 +79,93 @@ System.Windows.Forms.TreeViewEventArgs e)
 
             treeView1.SelectedNode = curNode;
 
-            
+
             if (e.Button != MouseButtons.Right) return;
 
 
-            contextMenuStrip1.Show(treeView1, e.X,e.Y);
+            contextMenuStrip1.Show(treeView1, e.X, e.Y);
         }
 
+        protected void treeView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Delete || treeView1.SelectedNode == treeView1.Nodes[0]) return;
+
+            TreeNode nodeToDelete = treeView1.SelectedNode;
+            TreeNode nextNode = treeView1.SelectedNode.PrevNode != null ? treeView1.SelectedNode.PrevNode : treeView1.SelectedNode.Parent;
+
+            treeView1.SelectedNode = nextNode;
+
+            if (parsedData.Columns[nodeToDelete.Text] != null)
+            {
+                parsedData.Columns.Remove(nodeToDelete.Text);
+            }
+            treeView1.Nodes.Remove(nodeToDelete);
+        }
+
+        private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            if (treeView1.SelectedNode != null && dataGridView1.Columns[treeView1.SelectedNode.Text] != null)
+            {
+                if (selectedNode != null && dataGridView1.Columns[selectedNode.Text] != null)
+                    dataGridView1.Columns[selectedNode.Text].Visible = false;
+
+                dataGridView1.Columns[treeView1.SelectedNode.Text].Visible = true;
+            }
+
+            if (dataGridView1.Columns[treeView1.SelectedNode.Text] != null)
+                selectedNode = treeView1.SelectedNode;
+        }
+
+        private void treeView1_AfterLabelEdit(object sender, System.Windows.Forms.NodeLabelEditEventArgs e)
+        {
+            if (e.Label != null && parsedData.Columns[e.Label] == null && parsedData.Columns[e.Label] == null)
+            {
+                parsedData.Columns[e.Node.Text].ColumnName = e.Label;
+                //dataGridView1.Columns[e.Label].Visible = false;
+            }
+            else
+            {
+                e.CancelEdit = true;
+            }
+
+        }
+
+        private void AddChild(object sender, EventArgs e)
+        {
+            string newName = "New";
+            int failTimes = 0;
+
+            while(parsedData.Columns[newName] != null)
+            {
+                newName = "New" + (failTimes).ToString();
+                failTimes++;
+            }
+
+            TreeNode newChild = treeView1.SelectedNode.Nodes.Add(newName);
+            treeView1.SelectedNode.Expand();
+            newChild.BeginEdit();
+            
+
+            parsedData.Columns.Add(newName);
+            treeView1.SelectedNode = newChild;
+        }
+
+        // Load a TreeView control from an XML file.
+        private void LoadTreeViewFromXmlFile()
+        {
+            // Load the XML document.
+            XmlDocument xml_doc = new XmlDocument();
+            xml_doc.Load("treestructure.xml");
+
+            // Add the root node's children to the TreeView.
+            treeView1.Nodes.Clear();
+            //treeView1.Nodes.Add(new
+            //    TreeNode(xml_doc.DocumentElement.Name));
+            TreeNode parent = treeView1.Nodes.Add(xml_doc.FirstChild.Name);
+            AddTreeViewChildNodes(parent.Nodes, xml_doc.DocumentElement);
+
+            treeView1.Sort();
+        }
 
         private void SaveNodes(TreeNodeCollection nodesCollection, XmlWriter textWriter)
         {
@@ -106,91 +193,49 @@ System.Windows.Forms.TreeViewEventArgs e)
             }
         }
 
-        // Load a TreeView control from an XML file.
-        private void LoadTreeViewFromXmlFile()
+        #endregion
+
+        #region Datatable interactions
+
+        public void dataGridView1_KeyDown(object sender, KeyEventArgs e)
         {
-            // Load the XML document.
-            XmlDocument xml_doc = new XmlDocument();
-            xml_doc.Load("treestructure.xml");
-
-            // Add the root node's children to the TreeView.
-            treeView1.Nodes.Clear();
-            //treeView1.Nodes.Add(new
-            //    TreeNode(xml_doc.DocumentElement.Name));
-            TreeNode parent = treeView1.Nodes.Add(xml_doc.FirstChild.Name);
-            AddTreeViewChildNodes(parent.Nodes, xml_doc.DocumentElement);
-
-            treeView1.Sort();
-        }
-
-        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
-        {
-            XmlWriter writer = null;
-
-            try
+            if (e.KeyCode == Keys.Delete)
             {
-                // Create an XmlWriterSettings object with the correct options.
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.Indent = true;
-                settings.IndentChars = ("\t");
-                settings.OmitXmlDeclaration = true;
+                foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
+                {
+                    cell.Value = "";
+                }
 
-                // Create the XmlWriter object and write some content.
-                writer = XmlWriter.Create("treestructure.xml", settings);
-                //writer.WriteStartElement("Default");
-                SaveNodes(treeView1.Nodes, writer);
-                //writer.WriteEndAttribute();
-            }
-            finally
-            {
-                if (writer != null)
-                    writer.Close();
-            }
-
-            parsedData.TableName = "ADGroups";
-            parsedData.WriteXml("DataXML.xml", XmlWriteMode.WriteSchema);
-        }
-
-        public Form1()
-        {
-            InitializeComponent();
-            LoadTreeViewFromXmlFile();
-            parsedData.ReadXml("DataXML.xml");
-            dataGridView1.DataSource = parsedData;
-
-            foreach (DataGridViewColumn column in dataGridView1.Columns)
-            {
-                column.Visible = false;
+                parsedData.Rows.Cast<DataRow>().ToList().FindAll(
+                    row => string.IsNullOrEmpty(string.Join("", row.ItemArray))
+                    ).ForEach(row => { parsedData.Rows.Remove(row); });
             }
         }
 
-        private void treeView1_AfterLabelEdit(object sender,
-         System.Windows.Forms.NodeLabelEditEventArgs e)
+        private void dataGridView1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Label != null && parsedData.Columns[e.Label] == null)
+            if (e.Button != MouseButtons.Right) return;
+
+            dataGridView1.ClearSelection();
+            DataGridView.HitTestInfo hit = dataGridView1.HitTest(e.X, e.Y);
+            if(hit.RowIndex != -1 && hit.ColumnIndex != -1)
             {
-                parsedData.Columns.Add(e.Label);
-                dataGridView1.Columns[e.Label].Visible = false;
+                dataGridView1.Rows[hit.RowIndex].Cells[hit.ColumnIndex].Selected = true;
+                contextMenuStrip2.Show(dataGridView1, e.X, e.Y);
             }
+
         }
 
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TreeNode newChild = treeView1.SelectedNode.Nodes.Add("New");
-            treeView1.SelectedNode.Expand();
-            newChild.BeginEdit();
-        }
-
-        private void newToolStripMenuItem2_Click(object sender, EventArgs e)
+        private void Paste(object sender, EventArgs e)
         {
             string clipData = Clipboard.GetText();
             string[] clipdatas = clipData.Split('\n');
-            if(clipdatas[clipdatas.Length-1] == "")
+            if (clipdatas[clipdatas.Length - 1] == "")
             {
                 clipdatas = clipdatas.Take(clipdatas.Count() - 1).ToArray();
             }
 
-            int cellRow = dataGridView1.SelectedCells[0].RowIndex-1;
+            int cellRow = dataGridView1.SelectedCells[0].RowIndex - 1;
             int cellColumn = dataGridView1.SelectedCells[0].ColumnIndex;
 
             foreach (string clip in clipdatas)
@@ -199,10 +244,6 @@ System.Windows.Forms.TreeViewEventArgs e)
                 {
                     DataRow row = parsedData.NewRow();
                     parsedData.Rows.Add(row);
-                    //dataGridView1.Rows.Add(row);
-                    //parsedData.AcceptChanges();
-                    //dataGridView1.DataSource = parsedData;
-
                 }
                 cellRow = cellRow + 1;
 
@@ -210,25 +251,8 @@ System.Windows.Forms.TreeViewEventArgs e)
             }
 
             parsedData.AcceptChanges();
-
-            //DataGridViewCell cell = dataGridView1.SelectedCells[0];
-            //int index = 0;
-            //foreach(string clip in clipdatas)
-            //{
-            //    cell.Value = clip;
-
-            //    if (cell.RowIndex + 1 >= parsedData.Rows.Count)
-            //    {
-            //        DataRow row = parsedData.NewRow();
-            //        parsedData.Rows.Add(row);
-            //        //dataGridView1.Rows.Add(row);
-            //        //parsedData.AcceptChanges();
-            //        //dataGridView1.DataSource = parsedData;
-                    
-            //    }
-
-            //    cell = dataGridView1.Rows[cell.RowIndex+1].Cells[cell.ColumnIndex];
-            //}
         }
+
+        #endregion
     }
 }

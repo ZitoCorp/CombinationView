@@ -1,103 +1,12 @@
 <?xml version="1.0" standalone="yes"?>
-<NewDataSet>
-  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="ADGroups" msdata:UseCurrentLocale="true">
-      <xs:complexType>
-        <xs:choice minOccurs="0" maxOccurs="unbounded">
-          <xs:element name="ADGroups">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="Default" type="xs:string" minOccurs="0" />
-                <xs:element name="Genders" type="xs:string" minOccurs="0" />
-                <xs:element name="Male" type="xs:string" minOccurs="0" />
-                <xs:element name="Female" type="xs:string" minOccurs="0" />
-                <xs:element name="Offices" type="xs:string" minOccurs="0" />
-                <xs:element name="Auckland" type="xs:string" minOccurs="0" />
-                <xs:element name="CHCH" type="xs:string" minOccurs="0" />
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-        </xs:choice>
-      </xs:complexType>
-    </xs:element>
-  </xs:schema>
+<DocumentElement>
   <ADGroups>
-    <Default />
-    <Genders>Gen1</Genders>
-    <Male>m1</Male>
-    <Female>Perms</Female>
-    <Auckland>AUK1</Auckland>
-    <CHCH>chch1</CHCH>
+    <Default>Def1</Default>
   </ADGroups>
   <ADGroups>
-    <Default>m2</Default>
-    <Genders>Gen2</Genders>
-    <Male>m3</Male>
-    <Female>Fem2</Female>
-    <Auckland>AUCK2</Auckland>
-    <CHCH>chch2</CHCH>
+    <Default>def2</Default>
   </ADGroups>
   <ADGroups>
-    <Default>m3</Default>
-    <Genders>Gen3</Genders>
-    <Male>m1</Male>
-    <Female>Fem3</Female>
-    <Auckland>AUCK3</Auckland>
-    <CHCH>chch3</CHCH>
+    <Default>def3</Default>
   </ADGroups>
-  <ADGroups>
-    <Default>m4</Default>
-    <CHCH>chch4</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <Default>m5</Default>
-    <CHCH>chch5</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <Default />
-    <CHCH>chch6</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch7</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch8</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch9</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch10</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch11</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch12</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch13</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch14</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch15</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch16</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch17</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch18</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH>chch19</CHCH>
-  </ADGroups>
-  <ADGroups>
-    <CHCH />
-  </ADGroups>
-  <ADGroups />
-</NewDataSet>
+</DocumentElement>

@@ -1,10 +1,9 @@
-﻿<default>
+﻿<Default>
 	<Genders>
-		<Female />
 		<Male />
+		<Female />
 	</Genders>
 	<Offices>
-		<Auckland />
-		<CHCH />
+		<New />
 	</Offices>
-</default>
+</Default>
