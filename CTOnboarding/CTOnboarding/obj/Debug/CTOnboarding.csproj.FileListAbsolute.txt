@@ -14,13 +14,10 @@ C:\Users\Madel\OneDrive\Documents\CTOnboarding\CTOnboarding\obj\Debug\CTOnboardi
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\bin\Debug\CTOnboarding.exe.config
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\bin\Debug\CTOnboarding.exe
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\bin\Debug\CTOnboarding.pdb
-C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\bin\Debug\GenericParsing.dll
-C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\bin\Debug\GenericParsing.xml
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.csprojAssemblyReference.cache
-C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.Form1.resources
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.Properties.Resources.resources
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.csproj.GenerateResource.cache
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.csproj.CoreCompileInputs.cache
-C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.csproj.CopyComplete
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.exe
 C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.pdb
+C:\Users\Madel\OneDrive\Documents\GitHub\EZView\CTOnboarding\CTOnboarding\obj\Debug\CTOnboarding.EZView.resources

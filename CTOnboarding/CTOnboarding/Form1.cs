@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace CTOnboarding
 {
-    public partial class Form1 : Form
+    public partial class EZView : Form
     {
         private TreeNode selectedNode;
         //private TreeNode oldSelectedNode;
@@ -46,7 +47,7 @@ namespace CTOnboarding
             parsedData.WriteXmlSchema("DataSchema.xml");
         }
 
-        public Form1()
+        public EZView()
         {
             InitializeComponent();
             LoadTreeViewFromXmlFile();
@@ -116,9 +117,24 @@ namespace CTOnboarding
                 selectedNode = treeView1.SelectedNode;
         }
 
+        private static bool StringIsValid(string str)
+        {
+            char[] cArray = str.ToCharArray();
+
+            foreach(char c in cArray)
+            {
+                if(!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+                (c >= '0' && c <= '9') || (c == '-')))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private void treeView1_AfterLabelEdit(object sender, System.Windows.Forms.NodeLabelEditEventArgs e)
         {
-            if (e.Label != null && parsedData.Columns[e.Label] == null && parsedData.Columns[e.Label] == null)
+            if (e.Label != null && StringIsValid(e.Label) && parsedData.Columns[e.Label] == null && parsedData.Columns[e.Label] == null)
             {
                 parsedData.Columns[e.Node.Text].ColumnName = e.Label;
                 //dataGridView1.Columns[e.Label].Visible = false;
