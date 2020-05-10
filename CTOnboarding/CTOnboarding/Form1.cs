@@ -314,5 +314,16 @@ namespace CTOnboarding
         {
             changesMade = true;
         }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form.ActiveForm.Close();
+        }
+
+        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                @"Organise grid of data in a hierarchy.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 }
