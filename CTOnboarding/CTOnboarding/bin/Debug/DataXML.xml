@@ -1,12 +1,9 @@
 <?xml version="1.0" standalone="yes"?>
 <DocumentElement>
   <ADGroups>
-    <Default>Def1</Default>
+    <Default>changesMade</Default>
   </ADGroups>
   <ADGroups>
-    <Default>def2</Default>
-  </ADGroups>
-  <ADGroups>
-    <Default>def3</Default>
+    <Default>test</Default>
   </ADGroups>
 </DocumentElement>

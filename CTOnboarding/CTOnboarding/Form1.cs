@@ -9,16 +9,18 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace CTOnboarding
 {
     public partial class EZView : Form
     {
         private TreeNode selectedNode;
+        bool changesMade = false;
         //private TreeNode oldSelectedNode;
         DataTable parsedData = new DataTable();
 
-        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
+        private void SaveData()
         {
             XmlWriter writer = null;
 
@@ -45,14 +47,42 @@ namespace CTOnboarding
             parsedData.TableName = "ADGroups";
             parsedData.WriteXml("DataXML.xml", XmlWriteMode.IgnoreSchema);
             parsedData.WriteXmlSchema("DataSchema.xml");
+            changesMade = false;
+        }
+
+        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
+        {
+            if (!changesMade) return;
+
+            DialogResult exitResult = MessageBox.Show("Would you like to save?", "Exiting...", MessageBoxButtons.YesNoCancel);
+            if (exitResult == DialogResult.Yes)
+            {
+                SaveData();
+            }
+            else if(exitResult == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+            }
         }
 
         public EZView()
         {
             InitializeComponent();
             LoadTreeViewFromXmlFile();
+
+            if (!File.Exists("DataSchema.xml")) { 
+                File.WriteAllText("DataSchema.xml", Properties.Resources.DataSchemaDefault);
+            }
             parsedData.ReadXmlSchema("DataSchema.xml");
+
+
+            if (!File.Exists("DataXML.xml"))
+            {
+                File.WriteAllText("DataXML.xml", Properties.Resources.DataXMLDefault);
+            }
             parsedData.ReadXml("DataXML.xml");
+
+
             dataGridView1.DataSource = parsedData;
 
             foreach (DataGridViewColumn column in dataGridView1.Columns)
@@ -60,12 +90,6 @@ namespace CTOnboarding
                 column.Visible = false;
             }
         }
-
-
-
-
-
-
 
         #region Hierarchy interactions
 
@@ -101,6 +125,7 @@ namespace CTOnboarding
                 parsedData.Columns.Remove(nodeToDelete.Text);
             }
             treeView1.Nodes.Remove(nodeToDelete);
+            changesMade = true;
         }
 
         private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
@@ -137,7 +162,7 @@ namespace CTOnboarding
             if (e.Label != null && StringIsValid(e.Label) && parsedData.Columns[e.Label] == null && parsedData.Columns[e.Label] == null)
             {
                 parsedData.Columns[e.Node.Text].ColumnName = e.Label;
-                //dataGridView1.Columns[e.Label].Visible = false;
+                changesMade = true;
             }
             else
             {
@@ -164,6 +189,7 @@ namespace CTOnboarding
 
             parsedData.Columns.Add(newName);
             treeView1.SelectedNode = newChild;
+            changesMade = true;
         }
 
         // Load a TreeView control from an XML file.
@@ -171,6 +197,10 @@ namespace CTOnboarding
         {
             // Load the XML document.
             XmlDocument xml_doc = new XmlDocument();
+            if (!File.Exists("treestructure.xml"))
+            {
+                File.WriteAllText("treestructure.xml", Properties.Resources.TreeStructureDefault);
+            }
             xml_doc.Load("treestructure.xml");
 
             // Add the root node's children to the TreeView.
@@ -225,6 +255,8 @@ namespace CTOnboarding
                 parsedData.Rows.Cast<DataRow>().ToList().FindAll(
                     row => string.IsNullOrEmpty(string.Join("", row.ItemArray))
                     ).ForEach(row => { parsedData.Rows.Remove(row); });
+
+                changesMade = true;
             }
         }
 
@@ -267,8 +299,20 @@ namespace CTOnboarding
             }
 
             parsedData.AcceptChanges();
+
+            changesMade = true;
         }
 
         #endregion
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveData();
+        }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            changesMade = true;
+        }
     }
 }
