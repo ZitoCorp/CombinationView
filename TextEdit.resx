@@ -117,38 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TreeStructureDefault" xml:space="preserve">
-    <value>&lt;default&gt;
-&lt;/default&gt;</value>
-  </data>
-  <data name="DataXMLDefault" xml:space="preserve">
-    <value>&lt;?xml version="1.0" standalone="yes"?&gt;
-&lt;DocumentElement&gt;
-  &lt;ADGroups&gt;
-    &lt;Default/&gt;
-  &lt;/ADGroups&gt;
-&lt;/DocumentElement&gt;</value>
-  </data>
-  <data name="DataSchemaDefault" xml:space="preserve">
-    <value>&lt;?xml version="1.0" standalone="yes"?&gt;
-&lt;xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"&gt;
-  &lt;xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="ADGroups" msdata:UseCurrentLocale="true"&gt;
-    &lt;xs:complexType&gt;
-      &lt;xs:choice minOccurs="0" maxOccurs="unbounded"&gt;
-        &lt;xs:element name="ADGroups"&gt;
-          &lt;xs:complexType&gt;
-            &lt;xs:sequence&gt;
-              &lt;xs:element name="Default" type="xs:string" minOccurs="0" /&gt;
-            &lt;/xs:sequence&gt;
-          &lt;/xs:complexType&gt;
-        &lt;/xs:element&gt;
-      &lt;/xs:choice&gt;
-    &lt;/xs:complexType&gt;
-  &lt;/xs:element&gt;
-&lt;/xs:schema&gt;</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="add" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>

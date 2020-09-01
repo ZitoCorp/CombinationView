@@ -5,50 +5,65 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Text.RegularExpressions;
 using System.IO;
+using Microsoft.VisualBasic.FileIO;
 
 namespace EZView
 {
     public partial class Viewer : Form
     {
-        private TreeNode selectedNode;
-
         // Flag for saving
         bool changesMade = false;
 
         DataTable parsedData = new DataTable();
 
+        // Read data from csv file
+        private void ReadData()
+        {
+            TextFieldParser tfp = new TextFieldParser(@"GroupData.csv");
+            tfp.SetDelimiters(",");
+            string[] fields = tfp.ReadFields();
+
+            // Column headers
+            foreach(string field in fields)
+            {
+                parsedData.Columns.Add(field);
+            }
+
+            // Rest of the data
+            while (!tfp.EndOfData)
+                parsedData.Rows.Add(tfp.ReadFields());
+        }
+
         // Save data to file
         private void SaveData()
         {
-            XmlWriter writer = null;
+            StringBuilder stringBuilder = new StringBuilder();
 
-            try
-            {
-                // Configure settings
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.Indent = true;
-                settings.IndentChars = ("\t");
-                settings.OmitXmlDeclaration = true;
- 
-                // Configure XMLWriter with settings
-                writer = XmlWriter.Create("treestructure.xml", settings);
+            // Construct first line with column headers
+            var columnHeaders = dataGridView1.Columns.Cast<DataGridViewColumn>();
+            stringBuilder.AppendLine(string.Join(",", columnHeaders.Select(column => "\"" + column.HeaderText + "\"").ToArray()));
 
-                SaveNodes(treeView1.Nodes, writer);
-            }
-            finally
+            // Construct remaining lines from normal DataGridViewRows
+            foreach(DataGridViewRow row in dataGridView1.Rows)
             {
-                if (writer != null)
-                    writer.Close();
+                var cells = row.Cells.Cast<DataGridViewCell>();
+                stringBuilder.AppendLine(string.Join(",", cells.Select(cell => "\"" + cell.Value + "\"").ToArray()));
+
+                // Exclude extra blank line
+                if (row.Index == dataGridView1.Rows.Count - 2)
+                    break;
             }
 
-            parsedData.TableName = "EZViewTable";
-            parsedData.WriteXml("DataXML.xml", XmlWriteMode.IgnoreSchema);
-            parsedData.WriteXmlSchema("DataSchema.xml");
+            // Write stringbuilder data to stream
+            System.IO.StreamWriter writer = new StreamWriter(@"GroupData.csv");
+
+            writer.Write(stringBuilder.ToString());
+            writer.Close();
+            writer.Dispose();
+
+            // Save complete
             changesMade = false;
         }
 
@@ -69,83 +84,44 @@ namespace EZView
             }
         }
 
+        void PopulateCombo(string file, ComboBox combo)
+        {
+            combo.Items.Clear();
+            string[] lines = file.Split('\n');
+            foreach(string line in lines)
+            {
+                combo.Items.Add(line);
+            }
+        }
+
         public Viewer()
         {
             InitializeComponent();
-            LoadTreeViewFromXmlFile();
 
-            if (!File.Exists("DataSchema.xml")) { 
-                File.WriteAllText("DataSchema.xml", Properties.Resources.DataSchemaDefault);
-            }
-            parsedData.ReadXmlSchema("DataSchema.xml");
+            UpdateCombos();
 
-
-            if (!File.Exists("DataXML.xml"))
+            // Check if CSV exists, otherwise create it
+            if(File.Exists(@"GroupData.csv"))
             {
-                File.WriteAllText("DataXML.xml", Properties.Resources.DataXMLDefault);
+                ReadData();
             }
-            parsedData.ReadXml("DataXML.xml");
-
-
+            
             dataGridView1.DataSource = parsedData;
 
+            ClearView();
+        }
+
+        // Set datagridview to default view
+        void ClearView()
+        {
             foreach (DataGridViewColumn column in dataGridView1.Columns)
             {
-                column.Visible = false;
+                if (column.HeaderText != "Default")
+                    column.Visible = false;
             }
         }
 
-        #region Hierarchy interactions
-
-        protected void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
-        {
-            TreeNode curNode = treeView1.GetNodeAt(e.X, e.Y);
-
-            if (e.Button == MouseButtons.Left && curNode == selectedNode)
-            {
-                curNode.BeginEdit();
-            }
-
-            treeView1.SelectedNode = curNode;
-
-
-            if (e.Button != MouseButtons.Right) return;
-
-
-            contextMenuStrip1.Show(treeView1, e.X, e.Y);
-        }
-
-        protected void treeView1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.Delete || treeView1.SelectedNode == treeView1.Nodes[0]) return;
-
-            TreeNode nodeToDelete = treeView1.SelectedNode;
-            TreeNode nextNode = treeView1.SelectedNode.PrevNode != null ? treeView1.SelectedNode.PrevNode : treeView1.SelectedNode.Parent;
-
-            treeView1.SelectedNode = nextNode;
-
-            if (parsedData.Columns[nodeToDelete.Text] != null)
-            {
-                parsedData.Columns.Remove(nodeToDelete.Text);
-            }
-            treeView1.Nodes.Remove(nodeToDelete);
-            changesMade = true;
-        }
-
-        private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
-        {
-            if (treeView1.SelectedNode != null && dataGridView1.Columns[treeView1.SelectedNode.Text] != null)
-            {
-                if (selectedNode != null && dataGridView1.Columns[selectedNode.Text] != null)
-                    dataGridView1.Columns[selectedNode.Text].Visible = false;
-
-                dataGridView1.Columns[treeView1.SelectedNode.Text].Visible = true;
-            }
-
-            if (dataGridView1.Columns[treeView1.SelectedNode.Text] != null)
-                selectedNode = treeView1.SelectedNode;
-        }
-
+        // Return if string is valid or not
         private static bool StringIsValid(string str)
         {
             char[] cArray = str.ToCharArray();
@@ -161,99 +137,13 @@ namespace EZView
             return true;
         }
 
-        private void treeView1_AfterLabelEdit(object sender, System.Windows.Forms.NodeLabelEditEventArgs e)
-        {
-            if (e.Label != null && StringIsValid(e.Label) && parsedData.Columns[e.Label] == null && parsedData.Columns[e.Label] == null)
-            {
-                parsedData.Columns[e.Node.Text].ColumnName = e.Label;
-                changesMade = true;
-            }
-            else
-            {
-                e.CancelEdit = true;
-            }
-
-        }
-
-        private void AddChild(object sender, EventArgs e)
-        {
-            string newName = "New";
-            int failTimes = 0;
-
-            while(parsedData.Columns[newName] != null)
-            {
-                newName = "New" + (failTimes).ToString();
-                failTimes++;
-            }
-
-            TreeNode newChild = treeView1.SelectedNode.Nodes.Add(newName);
-            treeView1.SelectedNode.Expand();
-            newChild.BeginEdit();
-            
-
-            parsedData.Columns.Add(newName);
-            treeView1.SelectedNode = newChild;
-            changesMade = true;
-        }
-
-        // Load a TreeView control from an XML file.
-        private void LoadTreeViewFromXmlFile()
-        {
-            // Load the XML document.
-            XmlDocument xml_doc = new XmlDocument();
-            if (!File.Exists("treestructure.xml"))
-            {
-                File.WriteAllText("treestructure.xml", Properties.Resources.TreeStructureDefault);
-            }
-            xml_doc.Load("treestructure.xml");
-
-            // Add the root node's children to the TreeView.
-            treeView1.Nodes.Clear();
-
-            TreeNode parent = treeView1.Nodes.Add(xml_doc.FirstChild.Name);
-            AddTreeViewChildNodes(parent.Nodes, xml_doc.DocumentElement);
-
-            treeView1.Sort();
-        }
-
-        private void SaveNodes(TreeNodeCollection nodesCollection, XmlWriter textWriter)
-        {
-            foreach (var node in nodesCollection.OfType<TreeNode>())
-            {
-                textWriter.WriteStartElement(node.Text);
-                SaveNodes(node.Nodes, textWriter);
-                textWriter.WriteEndElement();
-            }
-        }
-
-        private void AddTreeViewChildNodes(
-            TreeNodeCollection parent_nodes, XmlNode xml_node)
-        {
-            foreach (XmlNode child_node in xml_node.ChildNodes)
-            {
-                // Make the new TreeView node.
-                TreeNode new_node = parent_nodes.Add(child_node.Name);
-
-                // Recursively make this node's descendants.
-                AddTreeViewChildNodes(new_node.Nodes, child_node);
-
-                // If this is a leaf node, make sure it's visible.
-                if (new_node.Nodes.Count == 0) new_node.EnsureVisible();
-            }
-        }
-
-        #endregion
-
         #region Datatable interactions
 
         public void dataGridView1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
             {
-                foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
-                {
-                    cell.Value = "";
-                }
+                dataGridView1.SelectedCells.Cast<DataGridViewCell>().ToList().ForEach(cell => cell.Value = "");
 
                 parsedData.Rows.Cast<DataRow>().ToList().FindAll(
                     row => string.IsNullOrEmpty(string.Join("", row.ItemArray))
@@ -327,6 +217,91 @@ namespace EZView
         {
             MessageBox.Show(
                 @"Organise grid of data in a hierarchy.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ShowCombination();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ShowCombination();
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ShowCombination();
+        }
+
+        // Show combinations of office, department and title.
+        void ShowCombination()
+        {
+            // Check that combos aren't their default values
+            if(OfficeCombo.Text != "Offices" && DepartmentCombo.Text != "Departments" && TitleCombo.Text != "Titles")
+            {
+                ClearView();
+                string officeText = OfficeCombo.Text.ToString().Trim();
+                string departmentText = DepartmentCombo.Text.ToString().Trim();
+                string titleText = TitleCombo.Text.ToString().Trim();
+
+
+                List<String> combinations = new List<string>{ officeText, departmentText, titleText,
+                    officeText + "-" + departmentText,
+                    officeText + "-" + titleText,
+                    departmentText + "-" + titleText,
+                    officeText + "-" + departmentText + "-" + titleText
+                };
+
+                List<DataGridViewColumn> newColumns = new List<DataGridViewColumn>();
+               
+                foreach(string comb in combinations.ToList()) {
+                    foreach(DataGridViewColumn col in dataGridView1.Columns) {
+                        if(col.HeaderText == comb) {
+                            col.Visible = true;
+                            combinations.Remove(comb);
+                            break;
+                        }
+                    }
+                }
+
+                combinations.ForEach(comb => dataGridView1.Columns.Add(comb, comb));
+                changesMade = true;
+            }
+        }
+
+        private void OfficeBtn_Click(object sender, EventArgs e)
+        {
+            TextEdit textEdit = new TextEdit(this);
+            textEdit.Show();
+
+            textEdit.Initialize("Offices.txt");
+            this.Enabled = false;
+        }
+
+        private void DepartmentBtn_Click(object sender, EventArgs e)
+        {
+            TextEdit textEdit = new TextEdit(this);
+            textEdit.Show();
+
+            textEdit.Initialize("Departments.txt");
+            this.Enabled = false;
+        }
+
+        public void UpdateCombos()
+        {
+            PopulateCombo(File.ReadAllText("Offices.txt"), OfficeCombo);
+            PopulateCombo(File.ReadAllText("Departments.txt"), DepartmentCombo);
+            PopulateCombo(File.ReadAllText("Titles.txt"), TitleCombo);
+        }
+
+        private void TitleBtn_Click(object sender, EventArgs e)
+        {
+            TextEdit textEdit = new TextEdit(this);
+            textEdit.Show();
+
+            textEdit.Initialize("Titles.txt");
+            this.Enabled = false;
         }
     }
 }
